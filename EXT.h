@@ -48,6 +48,7 @@ typedef struct{
     int total;
     int first;
     int group;
+    int flags;
 } BlockInfo;
 
 typedef struct{

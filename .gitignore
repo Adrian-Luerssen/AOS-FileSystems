@@ -8,3 +8,7 @@ libfat
 lolext
 yakofs
 *.o
+*.o
+EXT.o
+FAT.o
+FileSystem.o

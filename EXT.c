@@ -42,8 +42,41 @@ void showInodeInfo(int fd){
     printf(INODE_FREE_STR, inodeInfo.free);
 }
 
+BlockInfo getBlockInfo(int fd){
+    BlockInfo blockInfo;
+    int val;
+    lseek(fd, EXT2_S_LOG_BLOCK_SIZE_OFFSET_TRUE, SEEK_SET);
+    read(fd, &val, EXT2_S_LOG_BLOCK_SIZE_SIZE);
+    blockInfo.size = 1024 << val;
 
-/*void showBLOCKInfo(int fd){
+    lseek(fd, EXT2_S_BLOCKS_COUNT_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.total, EXT2_S_BLOCKS_COUNT_SIZE);
+
+    lseek(fd, EXT2_S_FREE_BLOCKS_COUNT_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.free, EXT2_S_FREE_BLOCKS_COUNT_SIZE);
+
+    lseek(fd, EXT2_S_BLOCKS_PER_GROUP_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.group, EXT2_S_BLOCKS_PER_GROUP_SIZE);
+
+    lseek(fd, EXT2_S_R_BLOCKS_COUNT_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.reserved, EXT2_S_R_BLOCKS_COUNT_SIZE);
+
+    return blockInfo;
+}
+
+void showBlockInfo(int fd){
+    BlockInfo blockInfo = getBlockInfo(fd);
+    printf(BLOCK_HEADER);
+    printf(BLOCK_SIZE_STR, blockInfo.size);
+    printf(BLOCK_RES_STR, blockInfo.reserved);
+    printf(BLOCK_FREE_STR, blockInfo.free);
+    printf(BLOCK_TOTAL_STR, blockInfo.total);
+    printf("TODO: ");printf(BLOCK_FIRST_STR, blockInfo.first);
+    printf(BLOCK_GROUP_STR, blockInfo.group);
+    printf("TODO: ");printf(BLOCK_FLAG_STR, blockInfo.flags);
+}
+
+/*VolumeInfo getVolumeInfo (int fd) {
 
 }
 void showVOLUMEInfo(int fd) {

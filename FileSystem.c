@@ -29,6 +29,8 @@ void getFatInfo(int fd){
 
 void getExtInfo(int fd){
     printf(FS_HEADER);
-    printf("File System: %s\n","EXT2");
+    printf("File System: %s\n\n","EXT2");
     showInodeInfo(fd);
+    showBlockInfo(fd);
+    //showVolumeInfo(fd);
 }
