@@ -25,7 +25,7 @@
 #define BLOCK_TOTAL_STR "\tTotal Blocks: %d\n"
 #define BLOCK_FIRST_STR "\tFirst Block: %d\n"
 #define BLOCK_GROUP_STR "\tGroup Blocks: %d\n"
-#define BLOCK_FLAG_STR  "\tGroup Flags: %d\n"
+#define BLOCK_FRAG_STR  "\tGroup Frags: %d\n"
 
 #define VOLUME_HEADER   "INFO VOLUME\n"
 #define VOLUME_NAME_STR "\tVolume Name: %s\n"
@@ -48,7 +48,7 @@ typedef struct{
     int total;
     int first;
     int group;
-    int flags;
+    int frags;
 } BlockInfo;
 
 typedef struct{

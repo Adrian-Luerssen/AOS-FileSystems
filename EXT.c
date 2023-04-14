@@ -61,6 +61,12 @@ BlockInfo getBlockInfo(int fd){
     lseek(fd, EXT2_S_R_BLOCKS_COUNT_OFFSET_TRUE, SEEK_SET);
     read(fd, &blockInfo.reserved, EXT2_S_R_BLOCKS_COUNT_SIZE);
 
+    lseek(fd, EXT2_S_FRAGS_PER_GROUP_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.frags, EXT2_S_FRAGS_PER_GROUP_SIZE);
+
+    lseek(fd, EXT2_S_FIRST_DATA_BLOCK_OFFSET_TRUE, SEEK_SET);
+    read(fd, &blockInfo.first, EXT2_S_FIRST_DATA_BLOCK_SIZE);
+
     return blockInfo;
 }
 
@@ -71,9 +77,9 @@ void showBlockInfo(int fd){
     printf(BLOCK_RES_STR, blockInfo.reserved);
     printf(BLOCK_FREE_STR, blockInfo.free);
     printf(BLOCK_TOTAL_STR, blockInfo.total);
-    printf("TODO: ");printf(BLOCK_FIRST_STR, blockInfo.first);
+    printf(BLOCK_FIRST_STR, blockInfo.first);
     printf(BLOCK_GROUP_STR, blockInfo.group);
-    printf("TODO: ");printf(BLOCK_FLAG_STR, blockInfo.flags);
+    printf(BLOCK_FRAG_STR, blockInfo.frags);
 }
 
 /*VolumeInfo getVolumeInfo (int fd) {
