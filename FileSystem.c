@@ -32,5 +32,5 @@ void getExtInfo(int fd){
     printf("File System: %s\n\n","EXT2");
     showInodeInfo(fd);
     showBlockInfo(fd);
-    //showVolumeInfo(fd);
+    showVolumeInfo(fd);
 }
