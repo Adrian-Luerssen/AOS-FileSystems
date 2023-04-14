@@ -82,9 +82,34 @@ void showBlockInfo(int fd){
     printf(BLOCK_FRAG_STR, blockInfo.frags);
 }
 
-/*VolumeInfo getVolumeInfo (int fd) {
+VolumeInfo getVolumeInfo (int fd) {
+    VolumeInfo volumeInfo;
+    lseek(fd, EXT2_S_VOLUME_NAME_OFFSET_TRUE, SEEK_SET);
+    read(fd, &volumeInfo.name, EXT2_S_VOLUME_NAME_SIZE);
+
+    lseek(fd, EXT2_S_MTIME_OFFSET_TRUE, SEEK_SET);
+    read(fd, &volumeInfo.lastMounted, EXT2_S_MTIME_SIZE);
+
+    lseek(fd, EXT2_S_WTIME_OFFSET_TRUE, SEEK_SET);
+    read(fd, &volumeInfo.lastWritten, EXT2_S_WTIME_SIZE);
+
+    lseek(fd, EXT2_S_LAST_CHECK_TIME_OFFSET_TRUE, SEEK_SET);
+    read(fd, &volumeInfo.lastChecked, EXT2_S_LAST_CHECK_TIME_SIZE);
+
+    return volumeInfo;
+}
+char* getPOSIXTime(time_t time) {
+    char* posixTime;
+    posixTime = malloc(100);
+    strftime(posixTime, 100, TIME_FORMAT, localtime(&time));
+    return posixTime;
+}
+void showVolumeInfo(int fd) {
+    VolumeInfo volumeInfo = getVolumeInfo(fd);
+    printf(VOLUME_HEADER);
+    printf(VOLUME_NAME_STR, volumeInfo.name);
+    printf(VOLUME_CHECKED_STR, getPOSIXTime(volumeInfo.lastChecked));
+    printf(VOLUME_MOUNTED_STR, getPOSIXTime(volumeInfo.lastMounted));
+    printf(VOLUME_WRITTEN_STR, getPOSIXTime(volumeInfo.lastWritten));
 
 }
-void showVOLUMEInfo(int fd) {
-
-}*/

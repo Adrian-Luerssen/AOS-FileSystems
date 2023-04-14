@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
 #include "EXT_INFO.h"
 
 #define INODE_HEADER    "INODE INFO\n"
@@ -29,9 +31,11 @@
 
 #define VOLUME_HEADER   "INFO VOLUME\n"
 #define VOLUME_NAME_STR "\tVolume Name: %s\n"
-#define VOLUME_LAST_CHECKED_STR "\tLast Checked: %s %s %d %d:%d:%d %d\n"
-#define VOLUME_MOUNTED_STR "\tLast Mounted: %s %s %d %d:%d:%d %d\n"
-#define VOLUME_WRITTEN_STR "\tLast Written: %s %s %d %d:%d:%d %d\n"
+#define VOLUME_CHECKED_STR "\tLast Checked: %s\n"
+#define VOLUME_MOUNTED_STR "\tLast Mounted: %s\n"
+#define VOLUME_WRITTEN_STR "\tLast Written: %s\n"
+
+#define TIME_FORMAT "%c"
 
 typedef struct{
     int count;
@@ -52,7 +56,7 @@ typedef struct{
 } BlockInfo;
 
 typedef struct{
-    char name[16];
+    char name[EXT2_S_VOLUME_NAME_SIZE];
     int lastChecked;
     int lastMounted;
     int lastWritten;
