@@ -19,10 +19,11 @@ int main(int argc, char** argv) {
             if (fd < 0) {
                 return 1;
             }
+
             if (isFat(fd)){
-                printf("FAT");
+                getFatInfo(fd);
             } else if (isExt(fd)){
-                printf("EXT");
+                getExtInfo(fd);
             } else {
                 printf("Unknown");
                 return 1;

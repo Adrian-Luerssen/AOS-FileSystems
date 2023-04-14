@@ -21,3 +21,14 @@ int openFS(const char *path) {
     }*/
     return fd;
 }
+
+void getFatInfo(int fd){
+    printf(FS_HEADER);
+    printf("File System: %s\n",getFatType(fd));
+}
+
+void getExtInfo(int fd){
+    printf(FS_HEADER);
+    printf("File System: %s\n","EXT2");
+    showInodeInfo(fd);
+}

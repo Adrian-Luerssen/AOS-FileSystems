@@ -19,7 +19,7 @@ ext: EXT.c EXT.h
 	$(GCC) -c EXT.c -o EXT.o -Wextra -Wall
 fat: FAT.c FAT.h
 	$(GCC) -c FAT.c -o FAT.o -Wextra -Wall
-fsys: FileSystem.c FileSystem.h
+fsys: FileSystem.c FileSystem.h fat ext
 	$(GCC) -c FileSystem.c -o FileSystem.o -Wextra -Wall
 clean:
 	rm -fr fsutils *.o

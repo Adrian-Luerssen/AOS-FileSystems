@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include "FAT_INFO.h"
 bool isFat(int fd);
+char* getFatType(int fd);
 
 #endif //AOS_FILESYSTEMS_FAT_H
