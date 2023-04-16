@@ -24,12 +24,13 @@ int openFS(const char *path) {
 
 void getFatInfo(int fd){
     printf(FS_HEADER);
-    printf("File System: %s\n",getFatType(fd));
+    printf("Filesystem: %s\n\n",getFatType(fd));
+    showFatInfo(fd);
 }
 
 void getExtInfo(int fd){
     printf(FS_HEADER);
-    printf("File System: %s\n\n","EXT2");
+    printf("Filesystem: %s\n\n","EXT2");
     showInodeInfo(fd);
     showBlockInfo(fd);
     showVolumeInfo(fd);

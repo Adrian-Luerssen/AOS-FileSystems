@@ -57,9 +57,9 @@ typedef struct{
 
 typedef struct{
     char name[EXT2_S_VOLUME_NAME_SIZE];
-    int lastChecked;
-    int lastMounted;
-    int lastWritten;
+    unsigned int lastChecked;
+    unsigned int lastMounted;
+    unsigned int lastWritten;
 } VolumeInfo;
 
 bool isExt(int fd);

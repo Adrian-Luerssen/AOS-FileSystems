@@ -111,5 +111,4 @@ void showVolumeInfo(int fd) {
     printf(VOLUME_CHECKED_STR, getPOSIXTime(volumeInfo.lastChecked));
     printf(VOLUME_MOUNTED_STR, getPOSIXTime(volumeInfo.lastMounted));
     printf(VOLUME_WRITTEN_STR, getPOSIXTime(volumeInfo.lastWritten));
-
 }
