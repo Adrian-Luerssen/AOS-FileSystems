@@ -35,4 +35,6 @@ typedef struct {
 bool isFat(int fd);
 char* getFatType(int fd);
 void showFatInfo(int fd);
+
+void getFatTree(int fd);
 #endif //AOS_FILESYSTEMS_FAT_H

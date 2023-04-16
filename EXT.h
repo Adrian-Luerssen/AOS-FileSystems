@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include "EXT_INFO.h"
 
 #define INODE_HEADER    "INODE INFO\n"
@@ -56,7 +58,7 @@ typedef struct{
 } BlockInfo;
 
 typedef struct{
-    char name[EXT2_S_VOLUME_NAME_SIZE];
+    char name[EXT2_S_VOLUME_NAME_SIZE+1];
     unsigned int lastChecked;
     unsigned int lastMounted;
     unsigned int lastWritten;
@@ -66,4 +68,25 @@ bool isExt(int fd);
 void showInodeInfo(int fd);
 void showBlockInfo(int fd);
 void showVolumeInfo(int fd);
+
+
+typedef struct {
+    int length;
+    int num_blocks;
+    int blocks[EXT2_N_BLOCKS];
+} InodeTable;
+
+typedef struct {
+    int num_children;
+    struct ExtTree *children;
+    char name[EXT2_DIR_NAME_SIZE_MAX];
+    unsigned int inode;
+    unsigned short rec_len;
+    char name_len;
+    char file_type;
+} ExtTree;
+
+
+
+void getExtTree(int fd);
 #endif //AOS_FILESYSTEMS_EXT_H

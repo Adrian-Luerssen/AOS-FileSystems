@@ -28,6 +28,13 @@ int main(int argc, char** argv) {
                 printf("Unknown");
                 return 1;
             }
+        } else if (strcmp(argv[i],"--tree") == 0 && i+1 <= argc){
+            int fd = openFS(argv[i+1]);
+            if (fd < 0) {
+                return 1;
+            }
+
+            getFSTree(fd);
         }
     }
     return 0;

@@ -76,3 +76,7 @@ void showFatInfo(int fd){
     printf(LABEL_STR, fatInfo.label);
 
 }
+
+void getFatTree(int fd){
+    printf("%d - not implemented yet", fd);
+}

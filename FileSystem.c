@@ -35,3 +35,11 @@ void getExtInfo(int fd){
     showBlockInfo(fd);
     showVolumeInfo(fd);
 }
+
+void getFSTree(int fd){
+    if (isFat(fd)){
+        getFatTree(fd);
+    } else if (isExt(fd)){
+        getExtTree(fd);
+    }
+}
