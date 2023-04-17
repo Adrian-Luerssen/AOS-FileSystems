@@ -76,7 +76,34 @@ void showFatInfo(int fd){
     printf(LABEL_STR, fatInfo.label);
 
 }
+DirInfo getFatDirInfo(int fd, int dirOffset){
+    lseek(fd, dirOffset, SEEK_SET);
+    DirInfo dirInfo;
+    read(fd, &dirInfo, sizeof(DirInfo));
+    if (dirInfo.attributes == 0x10){
+        printf("%s\tDIRECTORY\n", dirInfo.shortName);
+    }
+    return dirInfo;
+}
 
 void getFatTree(int fd){
-    printf("%d - not implemented yet", fd);
+    //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
+    //RootDirSectors = ((BPB_RootEntCnt * 32) + (BPB_BytsPerSec – 1)) / BPB_BytsPerSec;
+    //FirstDataSector = BPB_ResvdSecCnt + (BPB_NumFATs * FATSz) + RootDirSectors;
+    //FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
+
+    FatInfo fatInfo = getFatFSInfo(fd);
+    int firstRootDirSecNum = fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat);
+    /*int n;
+    int rootDirSectors = ((fatInfo.rootEntries * 32) + (fatInfo.sectorSize - 1)) / fatInfo.sectorSize;
+    int firstDataSector = fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat) + rootDirSectors;
+    int firstSectorOfCluster = ((n - 2) * fatInfo.sectorsPerCluster) + firstDataSector;*/
+    printf("%d - not implemented yet\n", firstRootDirSecNum);
+    DirInfo d = getFatDirInfo(fd, firstRootDirSecNum*fatInfo.sectorSize);
+    for (int i = 1; i < fatInfo.rootEntries; i++){
+        printf("points to %d\n", d.firstClusterLow | d.firstClusterHigh << 16);
+        d = getFatDirInfo(fd, (d.firstClusterLow | d.firstClusterHigh << 16));
+
+    }
+
 }

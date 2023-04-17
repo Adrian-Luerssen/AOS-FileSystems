@@ -167,7 +167,7 @@ void printExtTree(ExtTree *extTree) {
     printf("%s", (*extTree).name);
 }
 
-ExtTree getDirInfo(int fd, long pos, int *offset) {
+ExtTree getExtDirInfo(int fd, long pos, int *offset) {
     ExtTree extTree;
 
     lseek(fd, pos + (*offset), SEEK_SET);
@@ -233,7 +233,7 @@ void buildExtTree(int fd, int inode, char *path, int level) {
         if (inodeTable.blocks[block] != 0) {
             while (offset < inodeTable.length && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
-                extTreeChild = getDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
+                extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 
                 if (isDir(extTreeChild)) buildExtTree(fd, extTreeChild.inode, extTreeChild.name, level + 1);
 

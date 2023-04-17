@@ -32,6 +32,22 @@ typedef struct {
     int sectorsPerFat;
     char label[BS_VOLLAB_SIZE];
 } FatInfo;
+
+typedef struct {
+    char shortName[FAT_DIR_NAME_SIZE];
+    char attributes;
+    char reserved;
+    char creationTimeTenth;
+    int creationTime;
+    int creationDate;
+    int lastAccessDate;
+    int firstClusterHigh;
+    int lastWriteTime;
+    int lastWriteDate;
+    int firstClusterLow;
+    int fileSize;
+} DirInfo;
+
 bool isFat(int fd);
 char* getFatType(int fd);
 void showFatInfo(int fd);
