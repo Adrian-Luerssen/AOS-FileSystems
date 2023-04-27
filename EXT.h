@@ -14,6 +14,7 @@
 #include <string.h>
 #include <time.h>
 #include "EXT_INFO.h"
+#include "printer.h"
 
 #define INODE_HEADER    "INODE INFO\n"
 #define INODE_SIZE_STR  "\tSize: %d\n"

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "FAT_INFO.h"
+#include "printer.h"
 
 #define SYS_NAME_STR "System Name: %s\n"
 #define SEC_SIZE_STR "Sector Size: %d\n"
@@ -36,7 +37,6 @@ typedef struct {
 typedef struct {
     char shortName[FAT_DIR_NAME_SIZE];
     char attributes;
-    char reserved;
     char creationTimeTenth;
     int creationTime;
     int creationDate;

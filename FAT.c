@@ -86,24 +86,49 @@ DirInfo getFatDirInfo(int fd, int dirOffset){
     return dirInfo;
 }
 
+DirInfo readFatDirInfo(int fd, int dirOffset){
+    DirInfo dirInfo;
+    lseek(fd, dirOffset+FAT_DIR_NAME_OFFSET, SEEK_SET);
+    read(fd, &dirInfo.shortName, FAT_DIR_NAME_SIZE);
+
+    lseek(fd, dirOffset+FAT_DIR_ATTR_OFFSET, SEEK_SET);
+    read(fd, &dirInfo.attributes, FAT_DIR_ATTR_SIZE);
+    return dirInfo;
+}
+
+
+
+void getFatTreeRecursive(int startSector, int level, int fd,char* path){
+    int rootEntries;
+    lseek(fd, BPB_ROOTENTCNT_OFFSET, SEEK_SET);
+    read(fd, &rootEntries, BPB_ROOTENTCNT_SIZE);
+    if (level != 0) printFileorDir(path, level,1);
+    for (int i = 0; i < rootEntries; i++){
+        DirInfo dirInfo = readFatDirInfo(fd, startSector + i*64);
+        if (dirInfo.shortName[0] == 0x00 ){
+            break;
+        }
+        if (dirInfo.attributes == 0x0F || strcmp(dirInfo.shortName, ".") == 0 || strcmp(dirInfo.shortName, "..") == 0 || dirInfo.attributes == 0x08){
+            continue;
+        }
+
+        int isDir = dirInfo.attributes == 0x10;
+        printFileorDir(dirInfo.shortName, level, isDir);
+
+    }
+}
+
 void getFatTree(int fd){
-    //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
+
     //RootDirSectors = ((BPB_RootEntCnt * 32) + (BPB_BytsPerSec – 1)) / BPB_BytsPerSec;
     //FirstDataSector = BPB_ResvdSecCnt + (BPB_NumFATs * FATSz) + RootDirSectors;
     //FirstSectorofCluster = ((N – 2) * BPB_SecPerClus) + FirstDataSector;
 
     FatInfo fatInfo = getFatFSInfo(fd);
-    int firstRootDirSecNum = fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat);
-    /*int n;
-    int rootDirSectors = ((fatInfo.rootEntries * 32) + (fatInfo.sectorSize - 1)) / fatInfo.sectorSize;
-    int firstDataSector = fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat) + rootDirSectors;
-    int firstSectorOfCluster = ((n - 2) * fatInfo.sectorsPerCluster) + firstDataSector;*/
-    printf("%d - not implemented yet\n", firstRootDirSecNum);
-    DirInfo d = getFatDirInfo(fd, firstRootDirSecNum*fatInfo.sectorSize);
-    for (int i = 1; i < fatInfo.rootEntries; i++){
-        printf("points to %d\n", d.firstClusterLow | d.firstClusterHigh << 16);
-        d = getFatDirInfo(fd, (d.firstClusterLow | d.firstClusterHigh << 16));
 
-    }
+    //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
+    int rootDirSector = (fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat))*fatInfo.sectorSize;
+
+    getFatTreeRecursive(rootDirSector, 0, fd,"root");
 
 }

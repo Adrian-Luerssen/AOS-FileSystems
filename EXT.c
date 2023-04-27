@@ -202,20 +202,7 @@ int isFile(ExtTree child) {
     return child.file_type == EXT2_FT_REG_FILE && strlen(child.name) > 0;
 }
 
-void printFileorDir(char* name, int level, int isDir){
-    // Print the path tree
-    if (isDir){
-        for (int i = 0; i < level; i++) {
-            printf("|   "); // Indentation for each level with lines
-        }
-        printf("\n");
-    }
 
-    for (int i = 0; i < level-1; i++) {
-        printf("|   "); // Indentation for each level with lines
-    }
-    printf("|---%s\n", name); // Print the current path with lines
-}
 
 
 void buildExtTree(int fd, int inode, char *path, int level) {
