@@ -76,15 +76,7 @@ void showFatInfo(int fd){
     printf(LABEL_STR, fatInfo.label);
 
 }
-DirInfo getFatDirInfo(int fd, int dirOffset){
-    lseek(fd, dirOffset, SEEK_SET);
-    DirInfo dirInfo;
-    read(fd, &dirInfo, sizeof(DirInfo));
-    if (dirInfo.attributes == 0x10){
-        printf("%s\tDIRECTORY\n", dirInfo.shortName);
-    }
-    return dirInfo;
-}
+
 
 DirInfo readFatDirInfo(int fd, int dirOffset){
     DirInfo dirInfo;
@@ -93,6 +85,12 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
 
     lseek(fd, dirOffset+FAT_DIR_ATTR_OFFSET, SEEK_SET);
     read(fd, &dirInfo.attributes, FAT_DIR_ATTR_SIZE);
+
+    lseek(fd, dirOffset+FAT_DIR_FSTCLUSHI_OFFSET, SEEK_SET);
+    read(fd, &dirInfo.firstClusterHigh, FAT_DIR_FSTCLUSHI_SIZE);
+
+    lseek(fd, dirOffset+FAT_DIR_FSTCLUSLO_OFFSET, SEEK_SET);
+    read(fd, &dirInfo.firstClusterLow, FAT_DIR_FSTCLUSLO_SIZE);
     return dirInfo;
 }
 
@@ -102,7 +100,8 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path){
     int rootEntries;
     lseek(fd, BPB_ROOTENTCNT_OFFSET, SEEK_SET);
     read(fd, &rootEntries, BPB_ROOTENTCNT_SIZE);
-    if (level != 0) printFileorDir(path, level,1);
+    if (level != 1) printFileorDir(path, level,1);
+
     for (int i = 0; i < rootEntries; i++){
         DirInfo dirInfo = readFatDirInfo(fd, startSector + i*64);
         if (dirInfo.shortName[0] == 0x00 ){
@@ -113,7 +112,12 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path){
         }
 
         int isDir = dirInfo.attributes == 0x10;
-        printFileorDir(dirInfo.shortName, level, isDir);
+
+        if (!isDir) printFileorDir(dirInfo.shortName, level, isDir);
+        else {
+            printFileorDir(dirInfo.shortName, level, isDir);
+            printFileorDir("TODO: WE NEED TO CHECK RECURSIVELY", level+1, 0);
+        }
 
     }
 }
@@ -129,6 +133,6 @@ void getFatTree(int fd){
     //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
     int rootDirSector = (fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat))*fatInfo.sectorSize;
 
-    getFatTreeRecursive(rootDirSector, 0, fd,"root");
+    getFatTreeRecursive(rootDirSector, 1, fd,"root");
 
 }
