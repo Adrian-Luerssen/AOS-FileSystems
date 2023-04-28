@@ -3,6 +3,7 @@
 #include "FAT.h"
 #include "FileSystem.h"
 #include "EXT.h"
+#include "printer.h"
 
 
 int main(int argc, char** argv) {
@@ -25,7 +26,7 @@ int main(int argc, char** argv) {
             } else if (isExt(fd)){
                 getExtInfo(fd);
             } else {
-                printf("Unknown");
+                printc("Unknown Filesystem\n", COLOR_RED);
                 return 1;
             }
         } else if (strcmp(argv[i],"--tree") == 0 && i+1 <= argc){
@@ -33,8 +34,13 @@ int main(int argc, char** argv) {
             if (fd < 0) {
                 return 1;
             }
+            if (isFat(fd) || isExt(fd)){
+                getFSTree(fd);
+            } else {
+                printc("Unknown Filesystem\n", COLOR_RED);
+                return 1;
+            }
 
-            getFSTree(fd);
         }
     }
     return 0;
