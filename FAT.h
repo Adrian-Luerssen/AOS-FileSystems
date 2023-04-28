@@ -25,12 +25,12 @@
 
 typedef struct {
     char name[BS_OEMNAME_SIZE];
-    int sectorSize;
-    int sectorsPerCluster;
-    char reservedSectors;
+    unsigned short sectorSize;
+    char sectorsPerCluster;
+    unsigned short reservedSectors;
     char numFat;
-    int rootEntries;
-    int sectorsPerFat;
+    unsigned short rootEntries;
+    unsigned short sectorsPerFat;
     char label[BS_VOLLAB_SIZE];
 } FatInfo;
 
@@ -44,7 +44,7 @@ typedef struct {
     int firstClusterHigh;
     int lastWriteTime;
     int lastWriteDate;
-    int firstClusterLow;
+    unsigned short firstClusterLow;
     int fileSize;
 } DirInfo;
 
