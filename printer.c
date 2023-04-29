@@ -15,7 +15,12 @@ void printFileorDir(char* name, int level, int isDir){
     for (int i = 0; i < level-1; i++) {
         printf("|   "); // Indentation for each level with lines
     }
-    printf("|---%s\n", name); // Print the current path with lines
+    if (isDir){
+        printf("|%s---%s\n"RESET, BOLD,name); // Print the current path with lines
+    }else{
+        printf("|---%s\n", name); // Print the current path
+    }
+
 }
 
 void printc(char* message, int color){
