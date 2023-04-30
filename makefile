@@ -9,7 +9,7 @@ run: main
 
 
 check_leaks: main
-	valgrind  --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --cat lolext popstars
+	valgrind  --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --cat libfat alloca.h
 
 
 main: main.c ext fat fsys printer

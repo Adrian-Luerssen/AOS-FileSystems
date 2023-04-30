@@ -27,10 +27,19 @@ char* getFatType(int fd){
     }
 
 }
-
+void initFatInfo(FatInfo* fatinfo){
+    strcpy(fatinfo->name, "");
+    strcpy(fatinfo->label, "");
+    fatinfo->sectorSize = 0;
+    fatinfo->sectorsPerCluster = 0;
+    fatinfo->reservedSectors = 0;
+    fatinfo->numFat = 0;
+    fatinfo->rootEntries = 0;
+    fatinfo->sectorsPerFat = 0;
+}
 FatInfo getFatFSInfo(int fd){
     FatInfo fatInfo;
-
+    initFatInfo(&fatInfo);
     lseek(fd, BS_OEMNAME_OFFSET, SEEK_SET);
     read(fd, fatInfo.name, BS_OEMNAME_SIZE);
 
@@ -60,6 +69,8 @@ FatInfo getFatFSInfo(int fd){
         lseek(fd, FAT32_BS_VOLLAB_OFFSET, SEEK_SET);
         read(fd, fatInfo.label, FAT32_BS_VOLLAB_SIZE);
     }
+    fatInfo.label[BS_VOLLAB_SIZE] = '\0';
+    fatInfo.name[BS_OEMNAME_SIZE] = '\0';
 
     return fatInfo;
 }
@@ -146,15 +157,18 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path,int rootD
             break;
         }
         int isDir = dirInfo.attributes == 0x10;
-        strcpy(dirInfo.shortName, fat_to_normal(dirInfo.shortName, isDir));
+
+        char* new = fat_to_normal(dirInfo.shortName, isDir);
         //
-        if (dirInfo.attributes == 0x0F || strlen(dirInfo.shortName) == 0 ||strcmp(dirInfo.shortName, ".") == 0 || strcmp(dirInfo.shortName, "..") == 0 || dirInfo.attributes == 0x08){
+        if (dirInfo.attributes == 0x0F || strlen(new) == 0 ||strcmp(new, ".") == 0 || strcmp(new, "..") == 0 || dirInfo.attributes == 0x08){
+            free(new);
             continue;
         }
 
 
         if (!isDir) {
-            printFileorDir(dirInfo.shortName, level+1, isDir);
+            printFileorDir(new, level+1, isDir);
+            free(new);
         }
         else {
             FatInfo fatInfo = getFatFSInfo(fd);
@@ -169,7 +183,8 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path,int rootD
             printf("((%d * %d) + %d) * %d + %d + %d\n", dirInfo.firstClusterLow, fatInfo.sectorsPerCluster, fatInfo.reservedSectors, fatInfo.sectorSize, startSector, rootDirSector);
             //break;*/
             //printf("index: %x\n", index);
-            getFatTreeRecursive(index, level+1, fd,dirInfo.shortName,rootDirSector);
+            getFatTreeRecursive(index, level+1, fd,new,rootDirSector);
+            free(new);
             //printf("\nback\n");
         }
 
@@ -218,17 +233,20 @@ int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFi
             break;
         }
         int isDir = dirInfo.attributes == 0x10;
-        strcpy(dirInfo.shortName, fat_to_normal(dirInfo.shortName, isDir));
+        char* new = fat_to_normal(dirInfo.shortName, isDir);
         //
-        if (dirInfo.attributes == 0x0F || strlen(dirInfo.shortName) == 0 ||strcmp(dirInfo.shortName, ".") == 0 || strcmp(dirInfo.shortName, "..") == 0 || dirInfo.attributes == 0x08){
+        if (dirInfo.attributes == 0x0F || strlen(new) == 0 ||strcmp(new, ".") == 0 || strcmp(new, "..") == 0 || dirInfo.attributes == 0x08){
+            free(new);
             continue;
         }
 
 
-        if (!isDir && strncasecmp(dirInfo.shortName, pathToFind, (strlen(pathToFind)>strlen(dirInfo.shortName))?strlen(pathToFind):strlen(dirInfo.shortName)) == 0) {
+        if (!isDir && strncasecmp(new, pathToFind, (strlen(pathToFind)>strlen(new))?strlen(pathToFind):strlen(new)) == 0) {
             printFatFileContents(dirInfo,fd,rootDirSector,rootEntries);
+            free(new);
             return 1;
         }
+        free(new);
         if (isDir) {
             FatInfo fatInfo = getFatFSInfo(fd);
             int index = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;

@@ -24,14 +24,14 @@
 #define LABEL_STR "Label: %s\n"
 
 typedef struct {
-    char name[BS_OEMNAME_SIZE];
+    char name[BS_OEMNAME_SIZE+1];
     unsigned short sectorSize;
     char sectorsPerCluster;
     unsigned short reservedSectors;
     char numFat;
     unsigned short rootEntries;
     unsigned short sectorsPerFat;
-    char label[BS_VOLLAB_SIZE];
+    char label[BS_VOLLAB_SIZE+1];
 } FatInfo;
 
 typedef struct {
