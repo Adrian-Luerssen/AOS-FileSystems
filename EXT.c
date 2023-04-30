@@ -269,12 +269,12 @@ int searchExtRecursive(int fd, int inode, char *filename){
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 
                 if (isDir(extTreeChild)){
-                    int a =  searchExtRecursive(fd, extTreeChild.inode, extTreeChild.name);
+                    int a =  searchExtRecursive(fd, extTreeChild.inode, filename);
                     if (a == 1) return 1;
                 }
                 //printf("extTreeChild.name: %s\n", extTreeChild.name);
                 //printf("filename: %s\n", filename);
-                if (isFile(extTreeChild) && strncasecmp(extTreeChild.name, filename, strlen(filename)) == 0) {
+                if (isFile(extTreeChild) && strncasecmp(extTreeChild.name, filename, (strlen(filename)>strlen(extTreeChild.name))?strlen(filename):strlen(extTreeChild.name)) == 0) {
                     printExtFileContents(extTreeChild,fd);
                     return 1;
                 }
