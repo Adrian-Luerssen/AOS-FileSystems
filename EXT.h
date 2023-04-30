@@ -83,7 +83,7 @@ typedef struct {
     char name[EXT2_DIR_NAME_SIZE_MAX];
     unsigned int inode;
     unsigned short rec_len;
-    char name_len;
+    int name_len;
     char file_type;
 } ExtTree;
 

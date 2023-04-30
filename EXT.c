@@ -8,13 +8,20 @@ bool isExt(int fd) {
     // ext2_xattr_header
     // first 4 bytes =  EXT2_XATTR_MAGIC = 0xEA020000
     lseek(fd, EXT2_S_MAGIC_OFFSET_TRUE, SEEK_SET);
-    int val;
+    int val = 0;
     read(fd, &val, EXT2_S_MAGIC_SIZE);
     return val == EXT2_SUPER_MAGIC;
 }
-
+void initialiseInodeInfo(InodeInfo* inodeInfo) {
+    inodeInfo->count = 0;
+    inodeInfo->free = 0;
+    inodeInfo->group = 0;
+    inodeInfo->first = 0;
+    inodeInfo->size = 0;
+}
 InodeInfo getInodeInfo(int fd) {
     InodeInfo inodeInfo;
+    initialiseInodeInfo(&inodeInfo);
 
     lseek(fd, EXT2_S_INODES_COUNT_OFFSET_TRUE, SEEK_SET);
     read(fd, &inodeInfo.count, EXT2_S_INODES_COUNT_SIZE);
@@ -44,9 +51,20 @@ void showInodeInfo(int fd) {
     printf(INODE_FREE_STR, inodeInfo.free);
 }
 
+void initialiseBlockInfo(BlockInfo* blockInfo) {
+    blockInfo->size = 0;
+    blockInfo->total = 0;
+    blockInfo->free = 0;
+    blockInfo->group = 0;
+    blockInfo->reserved = 0;
+    blockInfo->frags = 0;
+    blockInfo->first = 0;
+}
+
 BlockInfo getBlockInfo(int fd) {
     BlockInfo blockInfo;
-    int val;
+    initialiseBlockInfo(&blockInfo);
+    int val = 0;
     lseek(fd, EXT2_S_LOG_BLOCK_SIZE_OFFSET_TRUE, SEEK_SET);
     read(fd, &val, EXT2_S_LOG_BLOCK_SIZE_SIZE);
     blockInfo.size = 1024 << val;
@@ -84,8 +102,15 @@ void showBlockInfo(int fd) {
     printf(BLOCK_FRAG_STR, blockInfo.frags);
 }
 
+void initialiseVolumeInfo(VolumeInfo* volumeInfo) {
+    volumeInfo->lastChecked = 0;
+    volumeInfo->lastMounted = 0;
+    volumeInfo->lastWritten = 0;
+    strcpy(volumeInfo->name, "");
+}
 VolumeInfo getVolumeInfo(int fd) {
     VolumeInfo volumeInfo;
+    initialiseVolumeInfo(&volumeInfo);
     lseek(fd, EXT2_S_VOLUME_NAME_OFFSET_TRUE, SEEK_SET);
     read(fd, &volumeInfo.name, EXT2_S_VOLUME_NAME_SIZE);
 
@@ -101,20 +126,25 @@ VolumeInfo getVolumeInfo(int fd) {
     return volumeInfo;
 }
 
-char *getPOSIXTime(time_t time) {
-    char *posixTime;
-    posixTime = malloc(100);
+char* getPOSIXTime(time_t time) {
+    char posixTime[100];
     strftime(posixTime, 100, TIME_FORMAT, localtime(&time));
-    return posixTime;
+    return strdup(posixTime);
 }
 
 void showVolumeInfo(int fd) {
     VolumeInfo volumeInfo = getVolumeInfo(fd);
     printf(VOLUME_HEADER);
     printf(VOLUME_NAME_STR, volumeInfo.name);
-    printf(VOLUME_CHECKED_STR, getPOSIXTime(volumeInfo.lastChecked));
-    printf(VOLUME_MOUNTED_STR, getPOSIXTime(volumeInfo.lastMounted));
-    printf(VOLUME_WRITTEN_STR, getPOSIXTime(volumeInfo.lastWritten));
+    char * time = getPOSIXTime(volumeInfo.lastChecked);
+    printf(VOLUME_CHECKED_STR, time);
+    free(time);
+    time = getPOSIXTime(volumeInfo.lastMounted);
+    printf(VOLUME_MOUNTED_STR, time);
+    free(time);
+    time = getPOSIXTime(volumeInfo.lastWritten);
+    printf(VOLUME_WRITTEN_STR, time);
+    free(time);
 }
 
 
@@ -162,10 +192,6 @@ InodeTable getInodeTable(int fd, void *inode_in) {
     return inodeTable;
 }
 
-void printExtTree(ExtTree *extTree) {
-    //printf("%d", (*extTree).name_len);
-    printf("%s", (*extTree).name);
-}
 
 ExtTree getExtDirInfo(int fd, long pos, int *offset) {
     ExtTree extTree;
@@ -176,9 +202,9 @@ ExtTree getExtDirInfo(int fd, long pos, int *offset) {
     read(fd, &extTree.inode, EXT2_DIR_INODE_SIZE);
 
     read(fd, &extTree.rec_len, EXT2_DIR_REC_LEN_SIZE);
-
-    read(fd, &extTree.name_len, EXT2_DIR_NAME_LEN_SIZE);
-
+    char len = '0';
+    read(fd, &len, EXT2_DIR_NAME_LEN_SIZE);
+    extTree.name_len = (int) len;
     read(fd, &extTree.file_type, EXT2_DIR_FILE_TYPE_SIZE);
 
     read(fd, &extTree.name, extTree.name_len);

@@ -20,7 +20,8 @@ int main(int argc, char** argv) {
                 printc("Missing arguments\n", COLOR_RED);
                 return 1;
             }
-            int fd = openFS(argv[i+1]);
+            int fd = -1;
+            fd = openFS(argv[i+1]);
             if (fd < 0) {
                 return 1;
             }
@@ -31,8 +32,10 @@ int main(int argc, char** argv) {
                 getExtInfo(fd);
             } else {
                 printc("Unknown Filesystem\n", COLOR_RED);
+                close(fd);
                 return 1;
             }
+            close(fd);
         } else if (strcmp(argv[i],"--tree") == 0){
             if (i+1 >= argc){
                 printc("Missing arguments\n", COLOR_RED);
@@ -46,8 +49,10 @@ int main(int argc, char** argv) {
                 getFSTree(fd);
             } else {
                 printc("Unknown Filesystem\n", COLOR_RED);
+                close(fd);
                 return 1;
             }
+            close(fd);
 
         }else if (strcmp(argv[i],"--cat") == 0){
             if (i+2 >= argc){
@@ -62,8 +67,10 @@ int main(int argc, char** argv) {
                 catFile(fd, argv[i + 2]);
             } else {
                 printc("Unknown Filesystem\n", COLOR_RED);
+                close(fd);
                 return 1;
             }
+            close(fd);
 
         }
     }

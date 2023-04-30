@@ -9,7 +9,7 @@ run: main
 
 
 check_leaks: main
-	valgrind  --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --info lolext
+	valgrind  --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --cat lolext popstars
 
 
 main: main.c ext fat fsys printer
