@@ -8,7 +8,7 @@
 
 int main(int argc, char** argv) {
     if (argc < 3){
-        printf("not enough arguments");
+        printc("Not enough arguments\n", COLOR_RED);
         return 1;
     }
 
@@ -41,11 +41,8 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-        }else if (strcmp(argv[i],"--cat") == 0){
-            if (i+2 <= argc){
-                printc("Not enough arguments\n", COLOR_RED);
-                return 1;
-            }
+        }else if (strcmp(argv[i],"--cat") == 0 && i+2 <= argc){
+
             int fd = openFS(argv[i+1]);
             if (fd < 0) {
                 return 1;
@@ -57,6 +54,9 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
+        } else {
+            printc("Missing arguments\n", COLOR_RED);
+            return 1;
         }
     }
     return 0;
