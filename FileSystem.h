@@ -13,4 +13,5 @@ int openFS(const char *path);
 void getFatInfo(int fd);
 void getExtInfo(int fd);
 void getFSTree(int fd);
+void getFatFileContents(int fd, char *path);
 #endif //AOS_FILESYSTEMS_FILESYSTEM_H

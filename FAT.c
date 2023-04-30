@@ -91,6 +91,9 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
 
     lseek(fd, dirOffset+FAT_DIR_FSTCLUSLO_OFFSET, SEEK_SET);
     read(fd, &dirInfo.firstClusterLow, FAT_DIR_FSTCLUSLO_SIZE);
+
+    lseek(fd, dirOffset+FAT_DIR_FILESIZE_OFFSET, SEEK_SET);
+    read(fd, &dirInfo.fileSize, FAT_DIR_FILESIZE_SIZE);
     return dirInfo;
 }
 
@@ -186,4 +189,68 @@ void getFatTree(int fd){
 
     getFatTreeRecursive(rootDirSector, 0, fd,"root",rootDirSector);
 
+}
+void printFileContents(DirInfo dirInfo, int fd,int rootDirSector,int rootEntries){
+    FatInfo fatInfo = getFatFSInfo(fd);
+    int startSector = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;
+    int size = dirInfo.fileSize;
+    //printf("size: %d\n", size);
+    //printf("startSector: %d\n", startSector);
+    char buffer;
+    int bytesRead = 0;
+    lseek(fd, startSector, SEEK_SET);
+    while (bytesRead < size){
+        read(fd, &buffer, 1);
+        printf("%c", buffer);
+        //printf("\n%d read %d remaining", bytesRead, size - bytesRead);
+        bytesRead++;
+    }
+}
+
+int searchRecursive(int startSector, int fd,int rootDirSector, char* pathToFind){
+    unsigned short rootEntries;
+    lseek(fd, BPB_ROOTENTCNT_OFFSET, SEEK_SET);
+    read(fd, &rootEntries, BPB_ROOTENTCNT_SIZE);
+
+    for (int i = 0; i < rootEntries; i++){
+        DirInfo dirInfo = readFatDirInfo(fd, startSector + i*32);
+        if (dirInfo.shortName[0] == 0x00 || dirInfo.shortName[0] ==(char)0xE5){
+            break;
+        }
+        int isDir = dirInfo.attributes == 0x10;
+        strcpy(dirInfo.shortName, fat_to_normal(dirInfo.shortName, isDir));
+        //
+        if (dirInfo.attributes == 0x0F || strlen(dirInfo.shortName) == 0 ||strcmp(dirInfo.shortName, ".") == 0 || strcmp(dirInfo.shortName, "..") == 0 || dirInfo.attributes == 0x08){
+            continue;
+        }
+
+
+        if (strncasecmp(dirInfo.shortName, pathToFind, strlen(pathToFind)) == 0) {
+            printFileContents(dirInfo,fd,rootDirSector,rootEntries);
+            return 1;
+        }
+        else {
+            FatInfo fatInfo = getFatFSInfo(fd);
+            int index = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;
+
+            int a = searchRecursive(index, fd,rootDirSector,pathToFind);
+            if (a == 1){
+                return 1;
+            }
+        }
+
+    }
+    return 0;
+}
+
+
+void getFatFileContents(int fd, char* filename){
+    FatInfo fatInfo = getFatFSInfo(fd);
+
+    //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
+    int rootDirSector = (fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat))*fatInfo.sectorSize;
+
+    if(!searchRecursive(rootDirSector, fd,rootDirSector,filename)){
+        printf("File not found\n");
+    }
 }

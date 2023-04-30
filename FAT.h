@@ -53,4 +53,5 @@ char* getFatType(int fd);
 void showFatInfo(int fd);
 
 void getFatTree(int fd);
+void getFatFileContents(int fd, char* fileName);
 #endif //AOS_FILESYSTEMS_FAT_H
