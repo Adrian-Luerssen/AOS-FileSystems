@@ -90,4 +90,5 @@ typedef struct {
 
 
 void getExtTree(int fd);
+void getExtFileContents(int fd,char* filename);
 #endif //AOS_FILESYSTEMS_EXT_H

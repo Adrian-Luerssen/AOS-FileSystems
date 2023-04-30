@@ -190,7 +190,7 @@ void getFatTree(int fd){
     getFatTreeRecursive(rootDirSector, 0, fd,"root",rootDirSector);
 
 }
-void printFileContents(DirInfo dirInfo, int fd,int rootDirSector,int rootEntries){
+void printFatFileContents(DirInfo dirInfo, int fd,int rootDirSector,int rootEntries){
     FatInfo fatInfo = getFatFSInfo(fd);
     int startSector = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;
     int size = dirInfo.fileSize;
@@ -207,7 +207,7 @@ void printFileContents(DirInfo dirInfo, int fd,int rootDirSector,int rootEntries
     }
 }
 
-int searchRecursive(int startSector, int fd,int rootDirSector, char* pathToFind){
+int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFind){
     unsigned short rootEntries;
     lseek(fd, BPB_ROOTENTCNT_OFFSET, SEEK_SET);
     read(fd, &rootEntries, BPB_ROOTENTCNT_SIZE);
@@ -225,15 +225,15 @@ int searchRecursive(int startSector, int fd,int rootDirSector, char* pathToFind)
         }
 
 
-        if (strncasecmp(dirInfo.shortName, pathToFind, strlen(pathToFind)) == 0) {
-            printFileContents(dirInfo,fd,rootDirSector,rootEntries);
+        if (!isDir && strncasecmp(dirInfo.shortName, pathToFind, (strlen(pathToFind)>strlen(dirInfo.shortName))?strlen(pathToFind):strlen(dirInfo.shortName)) == 0) {
+            printFatFileContents(dirInfo,fd,rootDirSector,rootEntries);
             return 1;
         }
-        else {
+        if (isDir) {
             FatInfo fatInfo = getFatFSInfo(fd);
             int index = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;
 
-            int a = searchRecursive(index, fd,rootDirSector,pathToFind);
+            int a = searchFatRecursive(index, fd,rootDirSector,pathToFind);
             if (a == 1){
                 return 1;
             }
@@ -250,7 +250,7 @@ void getFatFileContents(int fd, char* filename){
     //FirstRootDirSecNum = BPB_ResvdSecCnt + (BPB_NumFATs * BPB_FATSz16);
     int rootDirSector = (fatInfo.reservedSectors + (fatInfo.numFat * fatInfo.sectorsPerFat))*fatInfo.sectorSize;
 
-    if(!searchRecursive(rootDirSector, fd,rootDirSector,filename)){
+    if(!searchFatRecursive(rootDirSector, fd,rootDirSector,filename)){
         printf("File not found\n");
     }
 }

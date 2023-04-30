@@ -47,5 +47,7 @@ void getFSTree(int fd){
 void catFile(int fd, char* file){
     if (isFat(fd)){
         getFatFileContents(fd,file);
+    } else if (isExt(fd)){
+        getExtFileContents(fd,file);
     }
 }

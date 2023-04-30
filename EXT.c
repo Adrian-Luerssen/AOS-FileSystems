@@ -209,6 +209,7 @@ void buildExtTree(int fd, int inode, char *path, int level) {
 
     int offset = 0;
     InodeTable inodeTable = getInodeTable(fd, &inode);
+
     ExtTree extTreeChild;
     extTreeChild.file_type = -1;
 
@@ -221,6 +222,7 @@ void buildExtTree(int fd, int inode, char *path, int level) {
             while (offset < inodeTable.length && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
+
 
                 if (isDir(extTreeChild)) buildExtTree(fd, extTreeChild.inode, extTreeChild.name, level + 1);
 
@@ -236,4 +238,55 @@ void buildExtTree(int fd, int inode, char *path, int level) {
 
 void getExtTree(int fd) {
     buildExtTree(fd, EXT2_ROOT_INO, "/", 0);
+}
+
+void printExtFileContents(ExtTree extTree, int fd) {
+    InodeTable inodeTable = getInodeTable(fd, &extTree.inode);
+
+    int offset = 0;
+    char buf;
+    lseek(fd, inodeTable.blocks[0] * getBlockInfo(fd).size, SEEK_SET);
+    while (offset < inodeTable.length) {
+        read(fd, &buf, 1);
+        offset++;
+        printf("%c", buf);
+    }
+}
+
+int searchExtRecursive(int fd, int inode, char *filename){
+    int offset = 0;
+    InodeTable inodeTable = getInodeTable(fd, &inode);
+
+    ExtTree extTreeChild;
+    extTreeChild.file_type = -1;
+
+
+    for (int block = 0; block < EXT2_N_BLOCKS && offset < inodeTable.length; block++) {
+        //printf("\nBlock %d\n", i);
+        if (inodeTable.blocks[block] != 0) {
+            while (offset < inodeTable.length && extTreeChild.file_type != 0) {
+                //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
+                extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
+
+                if (isDir(extTreeChild)){
+                    int a =  searchExtRecursive(fd, extTreeChild.inode, extTreeChild.name);
+                    if (a == 1) return 1;
+                }
+                //printf("extTreeChild.name: %s\n", extTreeChild.name);
+                //printf("filename: %s\n", filename);
+                if (isFile(extTreeChild) && strncasecmp(extTreeChild.name, filename, strlen(filename)) == 0) {
+                    printExtFileContents(extTreeChild,fd);
+                    return 1;
+                }
+
+            }
+        }
+    }
+    return 0;
+}
+
+void getExtFileContents(int fd,char* filename){
+    if (!searchExtRecursive(fd, EXT2_ROOT_INO, filename)){
+        printf("File not found\n");
+    }
 }
