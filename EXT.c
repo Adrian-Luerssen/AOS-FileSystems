@@ -126,23 +126,23 @@ VolumeInfo getVolumeInfo(int fd) {
     return volumeInfo;
 }
 
-char* getPOSIXTime(time_t time) {
-    char posixTime[100];
-    strftime(posixTime, 100, TIME_FORMAT, localtime(&time));
-    return strdup(posixTime);
+void getPOSIXTime(time_t time,char** posixTime) {
+    posixTime = (char**) malloc(100);
+    strftime(*posixTime, 100, TIME_FORMAT, localtime(&time));\
 }
 
 void showVolumeInfo(int fd) {
     VolumeInfo volumeInfo = getVolumeInfo(fd);
     printf(VOLUME_HEADER);
     printf(VOLUME_NAME_STR, volumeInfo.name);
-    char * time = getPOSIXTime(volumeInfo.lastChecked);
+    char * time;
+    getPOSIXTime(volumeInfo.lastChecked, &time);
     printf(VOLUME_CHECKED_STR, time);
     free(time);
-    time = getPOSIXTime(volumeInfo.lastMounted);
+    getPOSIXTime(volumeInfo.lastMounted, &time);
     printf(VOLUME_MOUNTED_STR, time);
     free(time);
-    time = getPOSIXTime(volumeInfo.lastWritten);
+    getPOSIXTime(volumeInfo.lastWritten, &time);
     printf(VOLUME_WRITTEN_STR, time);
     free(time);
 }
@@ -300,7 +300,7 @@ int searchExtRecursive(int fd, int inode, char *filename){
                 }
                 //printf("extTreeChild.name: %s\n", extTreeChild.name);
                 //printf("filename: %s\n", filename);
-                if (isFile(extTreeChild) && strncasecmp(extTreeChild.name, filename, (strlen(filename)>strlen(extTreeChild.name))?strlen(filename):strlen(extTreeChild.name)) == 0) {
+                if (isFile(extTreeChild) && strncmp(extTreeChild.name, filename, (strlen(filename)>strlen(extTreeChild.name))?strlen(filename):strlen(extTreeChild.name)) == 0) {
                     printExtFileContents(extTreeChild,fd);
                     return 1;
                 }

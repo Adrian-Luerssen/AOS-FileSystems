@@ -108,13 +108,13 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
     return dirInfo;
 }
 
-char* fat_to_normal(char* fat_name,int isDir){
+void fat_to_normal(char* fat_name,int isDir,char** normal_name){
     int i, j = 0;
-    char normal_name[13];
+    normal_name =(char**) malloc(sizeof(char)*13);
 
     // Copy first part of name (8 characters)
     for (i = 0; i < 8 && fat_name[i] != ' ' && fat_name[i] != '\n' && fat_name[i] != '\0'; i++) {
-        normal_name[j++] = fat_name[i];
+        (*normal_name)[j++] = fat_name[i];
     }
 
     // Skip over unused characters
@@ -125,19 +125,18 @@ char* fat_to_normal(char* fat_name,int isDir){
     // Copy extension (3 characters)
     if (!isDir){
         if (fat_name[8] != ' ') {
-            normal_name[j++] = '.';
+            (*normal_name)[j++] = '.';
             for (i = 8; i < 11 && fat_name[i] != ' '; i++) {
-                normal_name[j++] = fat_name[i];
+                (*normal_name)[j++] = fat_name[i];
             }
         }
     }
 
 
     // Null-terminate the string
-    normal_name[j] = '\0';
+    (*normal_name)[j] = '\0';
 
     // Return the normal name
-    return strdup(normal_name);
 }
 
 void getFatTreeRecursive(int startSector, int level, int fd,char* path,int rootDirSector){
@@ -158,7 +157,8 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path,int rootD
         }
         int isDir = dirInfo.attributes == 0x10;
 
-        char* new = fat_to_normal(dirInfo.shortName, isDir);
+        char* new;
+        fat_to_normal(dirInfo.shortName, isDir,&new);
         //
         if (dirInfo.attributes == 0x0F || strlen(new) == 0 ||strcmp(new, ".") == 0 || strcmp(new, "..") == 0 || dirInfo.attributes == 0x08){
             free(new);
@@ -233,7 +233,8 @@ int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFi
             break;
         }
         int isDir = dirInfo.attributes == 0x10;
-        char* new = fat_to_normal(dirInfo.shortName, isDir);
+        char* new;
+        fat_to_normal(dirInfo.shortName, isDir,&new);
         //
         if (dirInfo.attributes == 0x0F || strlen(new) == 0 ||strcmp(new, ".") == 0 || strcmp(new, "..") == 0 || dirInfo.attributes == 0x08){
             free(new);
@@ -241,7 +242,7 @@ int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFi
         }
 
 
-        if (!isDir && strncasecmp(new, pathToFind, (strlen(pathToFind)>strlen(new))?strlen(pathToFind):strlen(new)) == 0) {
+        if (!isDir && strncmp(new, pathToFind, (strlen(pathToFind)>strlen(new))?strlen(pathToFind):strlen(new)) == 0) {
             printFatFileContents(dirInfo,fd,rootDirSector,rootEntries);
             free(new);
             return 1;

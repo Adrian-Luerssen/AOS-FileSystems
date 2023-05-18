@@ -30,7 +30,7 @@ typedef struct {
     unsigned short reservedSectors;
     char numFat;
     unsigned short rootEntries;
-    unsigned short sectorsPerFat;
+    unsigned int sectorsPerFat;
     char label[BS_VOLLAB_SIZE+1];
 } FatInfo;
 
