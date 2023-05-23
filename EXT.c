@@ -242,10 +242,10 @@ void buildExtTree(int fd, int inode, char *path, int level) {
 
     if (level != 0) printFileorDir(path, level,1);
 
-    for (int block = 0; block < EXT2_N_BLOCKS && offset < inodeTable.length; block++) {
+    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int)inodeTable.length); block++) {
         //printf("\nBlock %d\n", i);
         if (inodeTable.blocks[block] != 0) {
-            while (offset < inodeTable.length && extTreeChild.file_type != 0) {
+            while (offset < ((int)inodeTable.length) && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 
@@ -272,7 +272,7 @@ void printExtFileContents(ExtTree extTree, int fd) {
     int offset = 0;
     char buf;
     lseek(fd, inodeTable.blocks[0] * getBlockInfo(fd).size, SEEK_SET);
-    while (offset < inodeTable.length) {
+    while (offset < ((int)inodeTable.length)) {
         read(fd, &buf, 1);
         offset++;
         printf("%c", buf);
@@ -287,10 +287,10 @@ int searchExtRecursive(int fd, int inode, char *filename){
     extTreeChild.file_type = -1;
 
 
-    for (int block = 0; block < EXT2_N_BLOCKS && offset < inodeTable.length; block++) {
+    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int)inodeTable.length); block++) {
         //printf("\nBlock %d\n", i);
         if (inodeTable.blocks[block] != 0) {
-            while (offset < inodeTable.length && extTreeChild.file_type != 0) {
+            while (offset < ((int)inodeTable.length) && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 

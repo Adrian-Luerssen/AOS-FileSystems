@@ -1,11 +1,13 @@
 GCC = gcc -march=native
 
-all: main
+all: main create_directory
 
 run: main
 	clear
 	./fsutils --info lolext
 
+create_directory:
+	mkdir -p out
 
 
 check_leaks: main
@@ -13,15 +15,15 @@ check_leaks: main
 
 
 main: main.c ext fat fsys printer
-	$(GCC) main.c -o  fsutils -lpthread -lm -Wextra -Wall EXT.o FAT.o FileSystem.o printer.o
+	$(GCC) main.c -o  fsutils -lpthread -lm -Wextra -Wall out/EXT.o out/FAT.o out/FileSystem.o out/printer.o
 
 ext: EXT.c EXT.h
-	$(GCC) -c EXT.c -o EXT.o -Wextra -Wall
+	$(GCC) -c EXT.c -o out/EXT.o -Wextra -Wall
 fat: FAT.c FAT.h
-	$(GCC) -c FAT.c -o FAT.o -Wextra -Wall
+	$(GCC) -c FAT.c -o out/FAT.o -Wextra -Wall
 fsys: FileSystem.c FileSystem.h fat ext
-	$(GCC) -c FileSystem.c -o FileSystem.o -Wextra -Wall
+	$(GCC) -c FileSystem.c -o out/FileSystem.o -Wextra -Wall
 printer: printer.c printer.h
-	$(GCC) -c printer.c -o printer.o -Wextra -Wall
+	$(GCC) -c printer.c -o out/printer.o -Wextra -Wall
 clean:
-	rm -fr fsutils *.o
+	rm -fr fsutils out/*.o *.o

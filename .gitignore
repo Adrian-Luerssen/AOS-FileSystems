@@ -1,10 +1,9 @@
-
 .idea/*
 cmake-build-debug/*
 CMakeLists.txt
-fat1.fs
-fsutils
-libfat
-lolext
-yakofs
-*.o
+files/fat1.fs
+files/fsutils
+files/libfat
+files/lolext
+files/yakofs
+

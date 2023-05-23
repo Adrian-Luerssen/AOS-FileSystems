@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
@@ -60,9 +61,9 @@ typedef struct{
 
 typedef struct{
     char name[EXT2_S_VOLUME_NAME_SIZE+1];
-    unsigned int lastChecked;
-    unsigned int lastMounted;
-    unsigned int lastWritten;
+    uint32_t lastChecked;
+    uint32_t lastMounted;
+    uint32_t lastWritten;
 } VolumeInfo;
 
 bool isExt(int fd);
@@ -72,18 +73,18 @@ void showVolumeInfo(int fd);
 
 
 typedef struct {
-    int length;
-    int num_blocks;
-    int blocks[EXT2_N_BLOCKS];
+    uint32_t length;
+    uint32_t num_blocks;
+    uint32_t blocks[EXT2_N_BLOCKS];
 } InodeTable;
 
 typedef struct {
-    int num_children;
+    uint32_t num_children;
     struct ExtTree *children;
     char name[EXT2_DIR_NAME_SIZE_MAX];
-    unsigned int inode;
-    unsigned short rec_len;
-    int name_len;
+    uint32_t inode;
+    uint16_t rec_len;
+    uint32_t name_len;
     char file_type;
 } ExtTree;
 
