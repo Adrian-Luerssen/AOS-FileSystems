@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -25,12 +26,12 @@
 
 typedef struct {
     char name[BS_OEMNAME_SIZE+1];
-    unsigned short sectorSize;
+    uint16_t sectorSize;
     char sectorsPerCluster;
-    unsigned short reservedSectors;
+    uint16_t reservedSectors;
     char numFat;
-    unsigned short rootEntries;
-    unsigned int sectorsPerFat;
+    uint16_t rootEntries;
+    uint32_t sectorsPerFat;
     char label[BS_VOLLAB_SIZE+1];
 } FatInfo;
 
@@ -38,14 +39,14 @@ typedef struct {
     char shortName[FAT_DIR_NAME_SIZE];
     char attributes;
     char creationTimeTenth;
-    int creationTime;
-    int creationDate;
-    int lastAccessDate;
-    int firstClusterHigh;
-    int lastWriteTime;
-    int lastWriteDate;
-    unsigned short firstClusterLow;
-    int fileSize;
+    uint32_t creationTime;
+    uint32_t creationDate;
+    uint32_t lastAccessDate;
+    uint32_t firstClusterHigh;
+    uint32_t lastWriteTime;
+    uint32_t lastWriteDate;
+    uint16_t firstClusterLow;
+    uint32_t fileSize;
 } DirInfo;
 
 bool isFat(int fd);

@@ -110,7 +110,8 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
 
 void fat_to_normal(char* fat_name,int isDir,char** normal_name){
     int i, j = 0;
-    normal_name =(char**) malloc(sizeof(char)*13);
+    *normal_name = (char*) malloc(sizeof(char) * 13);  // Allocate memory for the string
+
 
     // Copy first part of name (8 characters)
     for (i = 0; i < 8 && fat_name[i] != ' ' && fat_name[i] != '\n' && fat_name[i] != '\0'; i++) {
