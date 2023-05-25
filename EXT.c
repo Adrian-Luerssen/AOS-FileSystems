@@ -308,7 +308,10 @@ int searchExtRecursive(int fd, int inode, char *filename) {
                 }
                 //printf("extTreeChild.name: %s\n", extTreeChild.name);
                 //printf("filename: %s\n", filename);
-                if (isFile(extTreeChild) && strcasecmp(extTreeChild.name, filename)) {
+                if (isFile(extTreeChild) && strncasecmp(extTreeChild.name, filename,
+                                                    (strlen(filename) > strlen(extTreeChild.name)) ? strlen(filename)
+                                                                                                   : strlen(
+                                                            extTreeChild.name)) == 0) {
                     printExtFileContents(extTreeChild, fd);
                     return 1;
                 }
