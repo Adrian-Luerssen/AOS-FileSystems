@@ -268,15 +268,16 @@ void getExtTree(int fd) {
 
 void printExtFileContents(ExtTree extTree, int fd) {
     InodeTable inodeTable = getInodeTable(fd, &extTree.inode);
+    BlockInfo blockInfo = getBlockInfo(fd);
 
-    int offset = 0;
-    char buf;
-    lseek(fd, inodeTable.blocks[0] * getBlockInfo(fd).size, SEEK_SET);
-    while (offset < ((int)inodeTable.length)) {
-        read(fd, &buf, 1);
-        offset++;
-        printf("%c", buf);
+    char buf[blockInfo.size];
+    for (int i = 0; i < EXT2_N_BLOCKS && inodeTable.blocks[i] != 0; i++) {
+        lseek(fd, inodeTable.blocks[i] * blockInfo.size, SEEK_SET);
+        read(fd, buf, blockInfo.size);
+        printf("%.*s", inodeTable.length, buf);
+        inodeTable.length -= blockInfo.size;
     }
+
 }
 
 int searchExtRecursive(int fd, int inode, char *filename){
