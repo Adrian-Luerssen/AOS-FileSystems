@@ -36,7 +36,7 @@ typedef struct {
 } FatInfo;
 
 typedef struct {
-    char shortName[FAT_DIR_NAME_SIZE];
+    char shortName[FAT_DIR_NAME_SIZE+1];
     char attributes;
     char creationTimeTenth;
     uint32_t creationTime;

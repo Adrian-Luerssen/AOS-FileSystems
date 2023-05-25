@@ -8,7 +8,7 @@ bool isFat(int fd){
     lseek(fd, BS_FILSYSTYPE_OFFSET, SEEK_SET);
     char buffer[BS_FILSYSTYPE_SIZE+1]={0};
     read(fd, buffer, BS_FILSYSTYPE_SIZE);
-    return strcmp(buffer, FAT12_TYPE_STRING) == 0 || strcmp(buffer, FAT16_TYPE_STRING) == 0 || strcmp(buffer, FAT_TYPE_STRING) == 0;
+    return  strcmp(buffer, FAT16_TYPE_STRING) == 0 ;//|| strcmp(buffer, FAT12_TYPE_STRING) == 0 || strcmp(buffer, FAT_TYPE_STRING) == 0;
 }
 
 char* getFatType(int fd){
@@ -93,6 +93,7 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
     DirInfo dirInfo;
     lseek(fd, dirOffset+FAT_DIR_NAME_OFFSET, SEEK_SET);
     read(fd, &dirInfo.shortName, FAT_DIR_NAME_SIZE);
+    dirInfo.shortName[FAT_DIR_NAME_SIZE] = '\0';
 
     lseek(fd, dirOffset+FAT_DIR_ATTR_OFFSET, SEEK_SET);
     read(fd, &dirInfo.attributes, FAT_DIR_ATTR_SIZE);
@@ -110,7 +111,7 @@ DirInfo readFatDirInfo(int fd, int dirOffset){
 
 void fat_to_normal(char* fat_name,int isDir,char** normal_name){
     int i, j = 0;
-    *normal_name = (char*) malloc(sizeof(char) * 13);  // Allocate memory for the string
+    *normal_name = (char*) malloc(sizeof(char*) * (FAT_DIR_NAME_SIZE+1));  // Allocate memory for the string
 
 
     // Copy first part of name (8 characters)
@@ -232,10 +233,10 @@ void printFatFileContents(DirInfo dirInfo, int fd, int rootDirSector, int rootEn
     FatInfo fatInfo = getFatFSInfo(fd);
     int startSector = ((dirInfo.firstClusterLow - 2) * fatInfo.sectorsPerCluster) * fatInfo.sectorSize + rootDirSector + rootEntries * 32;
     int size = dirInfo.fileSize;
-    printf("Size: %d\n", size);
+    //printf("Size: %d\n", size);
 
     unsigned short currentCluster = dirInfo.firstClusterLow;
-    printf("Start Cluster: %d\n", currentCluster);
+    //printf("Start Cluster: %d\n", currentCluster);
 
     char buffer;
     int bytesRead = 0;

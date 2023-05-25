@@ -270,16 +270,20 @@ void getExtTree(int fd) {
 }
 
 void printExtFileContents(ExtTree extTree, int fd) {
+
     InodeTable inodeTable = getInodeTable(fd, &extTree.inode);
+
     BlockInfo blockInfo = getBlockInfo(fd);
 
-    char buf[blockInfo.size];
+    char *buf = malloc((blockInfo.size+1)*sizeof(char));
     for (int i = 0; i < EXT2_N_BLOCKS && inodeTable.blocks[i] != 0; i++) {
         lseek(fd, inodeTable.blocks[i] * blockInfo.size, SEEK_SET);
         read(fd, buf, blockInfo.size);
+        buf[blockInfo.size] = '\0';
         printf("%.*s", inodeTable.length, buf);
         inodeTable.length -= blockInfo.size;
     }
+    free(buf);
 
 }
 
