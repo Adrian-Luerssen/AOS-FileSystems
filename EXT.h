@@ -78,9 +78,7 @@ typedef struct {
     uint32_t blocks[EXT2_N_BLOCKS];
 } InodeTable;
 
-typedef struct {
-    uint32_t num_children;
-    struct ExtTree *children;
+typedef struct {;
     char name[EXT2_DIR_NAME_SIZE_MAX];
     uint32_t inode;
     uint16_t rec_len;
