@@ -130,7 +130,7 @@ VolumeInfo getVolumeInfo(int fd) {
 }
 
 void getPOSIXTime(time_t time, char **posixTime) {
-    posixTime = (char **) malloc(100);
+    *posixTime = (char *) malloc(sizeof(char*)*100);
     strftime(*posixTime, 100, TIME_FORMAT, localtime(&time));\
 
 }

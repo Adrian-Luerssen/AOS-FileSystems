@@ -8,7 +8,7 @@ run: main
 
 
 check_leaks: main
-	valgrind  --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --tree libfat
+	valgrind  --leak-check=full --show-leak-kinds=all --track-origins=yes -s --track-fds=yes --show-reachable=yes ./fsutils --info files/lolext
 
 
 main: main.c ext fat fsys printer

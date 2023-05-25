@@ -249,10 +249,10 @@ void printFatFileContents(DirInfo dirInfo, int fd, int rootDirSector, int rootEn
         // Check if reached end of cluster
             if (bytesRead % (fatInfo.sectorsPerCluster * fatInfo.sectorSize) == 0 && bytesRead > 0) {
             currentCluster = getNextCluster(fd, currentCluster);
-            printf("\nNext Cluster: %d\n", currentCluster);
+            //printf("\nNext Cluster: %d\n", currentCluster);
 
             if (currentCluster >= 0xFFF8) {
-                printf("End of cluster chain reached.\n");
+                //printf("End of cluster chain reached.\n");
                 break;
             }
 
