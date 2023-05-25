@@ -1,13 +1,10 @@
 GCC = gcc -march=native
 
-all: main create_directory
+all: main
 
 run: main
 	clear
 	./fsutils --info lolext
-
-create_directory:
-	mkdir -p out
 
 
 check_leaks: main

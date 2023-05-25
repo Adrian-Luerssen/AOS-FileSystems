@@ -12,13 +12,15 @@ bool isExt(int fd) {
     read(fd, &val, EXT2_S_MAGIC_SIZE);
     return val == EXT2_SUPER_MAGIC;
 }
-void initialiseInodeInfo(InodeInfo* inodeInfo) {
+
+void initialiseInodeInfo(InodeInfo *inodeInfo) {
     inodeInfo->count = 0;
     inodeInfo->free = 0;
     inodeInfo->group = 0;
     inodeInfo->first = 0;
     inodeInfo->size = 0;
 }
+
 InodeInfo getInodeInfo(int fd) {
     InodeInfo inodeInfo;
     initialiseInodeInfo(&inodeInfo);
@@ -51,7 +53,7 @@ void showInodeInfo(int fd) {
     printf(INODE_FREE_STR, inodeInfo.free);
 }
 
-void initialiseBlockInfo(BlockInfo* blockInfo) {
+void initialiseBlockInfo(BlockInfo *blockInfo) {
     blockInfo->size = 0;
     blockInfo->total = 0;
     blockInfo->free = 0;
@@ -102,12 +104,13 @@ void showBlockInfo(int fd) {
     printf(BLOCK_FRAG_STR, blockInfo.frags);
 }
 
-void initialiseVolumeInfo(VolumeInfo* volumeInfo) {
+void initialiseVolumeInfo(VolumeInfo *volumeInfo) {
     volumeInfo->lastChecked = 0;
     volumeInfo->lastMounted = 0;
     volumeInfo->lastWritten = 0;
     strcpy(volumeInfo->name, "");
 }
+
 VolumeInfo getVolumeInfo(int fd) {
     VolumeInfo volumeInfo;
     initialiseVolumeInfo(&volumeInfo);
@@ -126,16 +129,17 @@ VolumeInfo getVolumeInfo(int fd) {
     return volumeInfo;
 }
 
-void getPOSIXTime(time_t time,char** posixTime) {
-    posixTime = (char**) malloc(100);
+void getPOSIXTime(time_t time, char **posixTime) {
+    posixTime = (char **) malloc(100);
     strftime(*posixTime, 100, TIME_FORMAT, localtime(&time));\
+
 }
 
 void showVolumeInfo(int fd) {
     VolumeInfo volumeInfo = getVolumeInfo(fd);
     printf(VOLUME_HEADER);
     printf(VOLUME_NAME_STR, volumeInfo.name);
-    char * time;
+    char *time;
     getPOSIXTime(volumeInfo.lastChecked, &time);
     printf(VOLUME_CHECKED_STR, time);
     free(time);
@@ -224,11 +228,10 @@ int isDir(ExtTree child) {
     return child.file_type == EXT2_FT_DIR && strcmp(child.name, "..") != 0 &&
            strcmp(child.name, ".") != 0 && strlen(child.name) > 0;
 }
+
 int isFile(ExtTree child) {
     return child.file_type == EXT2_FT_REG_FILE && strlen(child.name) > 0;
 }
-
-
 
 
 void buildExtTree(int fd, int inode, char *path, int level) {
@@ -240,12 +243,12 @@ void buildExtTree(int fd, int inode, char *path, int level) {
     extTreeChild.file_type = -1;
 
 
-    if (level != 0) printFileorDir(path, level,1);
+    if (level != 0) printFileorDir(path, level, 1);
 
-    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int)inodeTable.length); block++) {
+    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int) inodeTable.length); block++) {
         //printf("\nBlock %d\n", i);
         if (inodeTable.blocks[block] != 0) {
-            while (offset < ((int)inodeTable.length) && extTreeChild.file_type != 0) {
+            while (offset < ((int) inodeTable.length) && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 
@@ -253,7 +256,7 @@ void buildExtTree(int fd, int inode, char *path, int level) {
                 if (isDir(extTreeChild)) buildExtTree(fd, extTreeChild.inode, extTreeChild.name, level + 1);
 
 
-                if (isFile(extTreeChild)) printFileorDir(extTreeChild.name, level+1, 0);
+                if (isFile(extTreeChild)) printFileorDir(extTreeChild.name, level + 1, 0);
 
             }
         }
@@ -268,18 +271,17 @@ void getExtTree(int fd) {
 
 void printExtFileContents(ExtTree extTree, int fd) {
     InodeTable inodeTable = getInodeTable(fd, &extTree.inode);
-
     int offset = 0;
     char buf;
     lseek(fd, inodeTable.blocks[0] * getBlockInfo(fd).size, SEEK_SET);
-    while (offset < ((int)inodeTable.length)) {
+    while (offset < ((int) inodeTable.length)) {
         read(fd, &buf, 1);
         offset++;
         printf("%c", buf);
     }
 }
 
-int searchExtRecursive(int fd, int inode, char *filename){
+int searchExtRecursive(int fd, int inode, char *filename) {
     int offset = 0;
     InodeTable inodeTable = getInodeTable(fd, &inode);
 
@@ -287,21 +289,24 @@ int searchExtRecursive(int fd, int inode, char *filename){
     extTreeChild.file_type = -1;
 
 
-    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int)inodeTable.length); block++) {
+    for (int block = 0; block < EXT2_N_BLOCKS && offset < ((int) inodeTable.length); block++) {
         //printf("\nBlock %d\n", i);
         if (inodeTable.blocks[block] != 0) {
-            while (offset < ((int)inodeTable.length) && extTreeChild.file_type != 0) {
+            while (offset < ((int) inodeTable.length) && extTreeChild.file_type != 0) {
                 //printf("\t\tOffset %d > %d\n", offset, inodeTable.length);
                 extTreeChild = getExtDirInfo(fd, inodeTable.blocks[block] * getBlockInfo(fd).size, &offset);
 
-                if (isDir(extTreeChild)){
-                    int a =  searchExtRecursive(fd, extTreeChild.inode, filename);
+                if (isDir(extTreeChild)) {
+                    int a = searchExtRecursive(fd, extTreeChild.inode, filename);
                     if (a == 1) return 1;
                 }
                 //printf("extTreeChild.name: %s\n", extTreeChild.name);
                 //printf("filename: %s\n", filename);
-                if (isFile(extTreeChild) && strncmp(extTreeChild.name, filename, (strlen(filename)>strlen(extTreeChild.name))?strlen(filename):strlen(extTreeChild.name)) == 0) {
-                    printExtFileContents(extTreeChild,fd);
+                if (isFile(extTreeChild) && strncmp(extTreeChild.name, filename,
+                                                    (strlen(filename) > strlen(extTreeChild.name)) ? strlen(filename)
+                                                                                                   : strlen(
+                                                            extTreeChild.name)) == 0) {
+                    printExtFileContents(extTreeChild, fd);
                     return 1;
                 }
 
@@ -311,8 +316,8 @@ int searchExtRecursive(int fd, int inode, char *filename){
     return 0;
 }
 
-void getExtFileContents(int fd,char* filename){
-    if (!searchExtRecursive(fd, EXT2_ROOT_INO, filename)){
+void getExtFileContents(int fd, char *filename) {
+    if (!searchExtRecursive(fd, EXT2_ROOT_INO, filename)) {
         printf("File not found\n");
     }
 }

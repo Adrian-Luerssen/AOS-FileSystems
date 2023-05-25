@@ -153,7 +153,7 @@ void getFatTreeRecursive(int startSector, int level, int fd,char* path,int rootD
 
         //printf("dirInfo.shortName: %s + %d + %x - %x\n", dirInfo.shortName, dirInfo.attributes==0x10, dirInfo.attributes, dirInfo.shortName[0]);
         //printf("name: '%s' exit if '%s' or '%s'\n", dirInfo.shortName,".", "..");
-        if (dirInfo.shortName[0] == 0x00 || dirInfo.shortName[0] ==(char)0xE5){
+        if (dirInfo.shortName[0] == 0x00 || dirInfo.shortName[0] ==(char)0xE5){ // empty, free
             break;
         }
         int isDir = dirInfo.attributes == 0x10;
@@ -206,22 +206,62 @@ void getFatTree(int fd){
     getFatTreeRecursive(rootDirSector, 0, fd,"root",rootDirSector);
 
 }
-void printFatFileContents(DirInfo dirInfo, int fd,int rootDirSector,int rootEntries){
+
+unsigned short getNextCluster(int fd, unsigned short currentCluster) {
     FatInfo fatInfo = getFatFSInfo(fd);
-    int startSector = ((dirInfo.firstClusterLow-2)*fatInfo.sectorsPerCluster)*fatInfo.sectorSize + rootDirSector + rootEntries*32;
+
+    // Calculate the offset of the current cluster in the FAT
+    int fatOffset = fatInfo.reservedSectors * fatInfo.sectorSize + currentCluster * 2;
+
+    // Read the next cluster number from the FAT
+    unsigned short nextCluster;
+    lseek(fd, fatOffset, SEEK_SET);
+    read(fd, &nextCluster, 2);
+
+    return nextCluster;
+    // Check for end-of-chain markers
+    /*if (nextCluster >= 0xFFF8 && nextCluster <= FAT_EOC_MAX) {
+        return FAT_LAST_CLUSTER;  // End of cluster chain
+    } else {
+        return nextCluster;  // Next cluster in the chain
+    }*/
+}
+
+
+void printFatFileContents(DirInfo dirInfo, int fd, int rootDirSector, int rootEntries) {
+    FatInfo fatInfo = getFatFSInfo(fd);
+    int startSector = ((dirInfo.firstClusterLow - 2) * fatInfo.sectorsPerCluster) * fatInfo.sectorSize + rootDirSector + rootEntries * 32;
     int size = dirInfo.fileSize;
-    //printf("size: %d\n", size);
-    //printf("startSector: %d\n", startSector);
+    printf("Size: %d\n", size);
+
+    unsigned short currentCluster = dirInfo.firstClusterLow;
+    printf("Start Cluster: %d\n", currentCluster);
+
     char buffer;
     int bytesRead = 0;
     lseek(fd, startSector, SEEK_SET);
-    while (bytesRead < size){
+
+    while (bytesRead < size) {
         read(fd, &buffer, 1);
         printf("%c", buffer);
-        //printf("\n%d read %d remaining", bytesRead, size - bytesRead);
         bytesRead++;
+
+        // Check if reached end of cluster
+            if (bytesRead % (fatInfo.sectorsPerCluster * fatInfo.sectorSize) == 0 && bytesRead > 0) {
+            currentCluster = getNextCluster(fd, currentCluster);
+            printf("\nNext Cluster: %d\n", currentCluster);
+
+            if (currentCluster >= 0xFFF8) {
+                printf("End of cluster chain reached.\n");
+                break;
+            }
+
+            int clusterOffset = (currentCluster - 2) * fatInfo.sectorsPerCluster * fatInfo.sectorSize + rootDirSector + rootEntries * 32;
+            lseek(fd, clusterOffset, SEEK_SET);
+        }
     }
 }
+
 
 int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFind){
     unsigned short rootEntries;
@@ -230,7 +270,7 @@ int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFi
 
     for (int i = 0; i < rootEntries; i++){
         DirInfo dirInfo = readFatDirInfo(fd, startSector + i*32);
-        if (dirInfo.shortName[0] == 0x00 || dirInfo.shortName[0] ==(char)0xE5){
+        if (dirInfo.shortName[0] == 0x00 || dirInfo.shortName[0] ==(char)0xE5){ //empty / free
             break;
         }
         int isDir = dirInfo.attributes == 0x10;
