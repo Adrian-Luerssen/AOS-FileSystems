@@ -79,7 +79,7 @@ typedef struct {
 } InodeTable;
 
 typedef struct {;
-    char name[EXT2_DIR_NAME_SIZE_MAX];
+    char name[EXT2_DIR_NAME_SIZE_MAX+1];
     uint32_t inode;
     uint16_t rec_len;
     uint32_t name_len;
