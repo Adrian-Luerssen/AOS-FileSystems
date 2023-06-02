@@ -284,7 +284,7 @@ int searchFatRecursive(int startSector, int fd,int rootDirSector, char* pathToFi
         }
 
 
-        if (!isDir && strncasecmp(new, pathToFind, (strlen(pathToFind)>strlen(new))?strlen(pathToFind):strlen(new)) == 0) {
+        if (!isDir && strncmp(new, pathToFind, (strlen(pathToFind)>strlen(new))?strlen(pathToFind):strlen(new)) == 0) {
             printFatFileContents(dirInfo,fd,rootDirSector,rootEntries);
             free(new);
             return 1;
